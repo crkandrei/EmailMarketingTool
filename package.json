@@ -11,8 +11,19 @@
     },
     "devDependencies": {
         "axios": "^0.21",
+        "jquery": "^3.6.0",
         "laravel-mix": "^6.0.6",
         "lodash": "^4.17.19",
-        "postcss": "^8.1.14"
+        "postcss": "^8.1.14",
+        "@claviska/jquery-ajaxSubmit": "^2.0.3",
+        "jquery-blockui": "^2.7.0",
+        "jquery-form": "^4.3.0",
+        "toastr": "^2.1.4"
+    },
+    "dependencies": {
+        "@claviska/jquery-ajaxSubmit": "^2.0.3",
+        "jquery-blockui": "^2.7.0",
+        "jquery-form": "^4.3.0",
+        "toastr": "^2.1.4"
     }
 }

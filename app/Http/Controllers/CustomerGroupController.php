@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\GroupAddRequest;
-use App\Http\Requests\GroupEditRequest;
+use App\Http\Requests\CustomerGroupAddRequest;
 use App\Http\Utils;
+use App\Models\CustomerGroup;
 use App\Models\Group;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class GroupUserController extends Controller
+class CustomerGroupController extends Controller
 {
     /**
      * Display the view of the customer.
@@ -18,70 +17,39 @@ class GroupUserController extends Controller
      */
     public function index()
     {
-        if(request()->ajax()){
+        return datatables()->of(CustomerGroup::where('group_id', request()->group_id)->with('customer')->get())
+            ->addIndexColumn()
+            ->addColumn('customer_name', function($data){
+                return $data->customer->first_name.' '.$data->customer->last_name;
+            })
+            ->addColumn('action', function($data){
 
-            return datatables()->of(Group::where('user_id', Auth::user()->id)->get())
-                ->addIndexColumn()
-                ->addColumn('action', function($data){
-                    $button = '<button type="button" name="add_users" id="'.$data->id.'" class="edit text-black btn btn-success btn-sm">Add users to group</button>';
-                    $button .= '&nbsp;&nbsp;';
-                    $button .= '<button type="button" name="edit" id="'.$data->id.'" class="edit text-black btn btn-primary btn-sm">Edit</button>';
-                    $button .= '&nbsp;&nbsp;';
-                    $button .= '<button type="button" name="delete" id="'.$data->id.'" class="delete btn btn-danger btn-sm">Delete</button>';
-                    return $button;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
-
-        }else{
-
-            return view('data.group');
-
-        }
+                return '<button type="button" name="delete" id="'.$data->id.'" class="delete-customers-to-group btn btn-danger btn-sm">Delete</button>';
+            })
+            ->rawColumns(['action'])
+            ->make(true);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param GroupAddRequest $request
+     * @param CustomerGroupAddRequest $request
      */
-    public function store(GroupAddRequest $request)
+    public function store(CustomerGroupAddRequest $request)
     {
         if($request->messages())
         {
             Utils::OutputResponse(405, $request->messages());
         }
 
-        $group = new Group([
-            "name"    => $request['form_add_name'],
-            "user_id"        => Auth::user()->id
+        $customer_to_group = new CustomerGroup([
+            "customer_id"    => $request['form_add_customer_id'],
+            "group_id"        => $request['form_add_group_id']
         ]);
 
-        $group->save();
+        $customer_to_group->save();
 
-        Utils::OutputResponse(200, "Group was added successfully");
-    }
-
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param GroupEditRequest $request
-     * @return void
-     */
-    public function update(GroupEditRequest $request)
-    {
-        if($request->messages())
-        {
-            Utils::OutputResponse(405, $request->messages());
-        }
-
-        Group::whereId($request['form_edit_id'])->update([
-            "name"    => $request['form_edit_name']
-        ]);
-
-
-        Utils::OutputResponse(200, "Group was edited successfully");
+        Utils::OutputResponse(200, "Customer added to group successfully!");
     }
 
     /**
@@ -92,8 +60,8 @@ class GroupUserController extends Controller
      */
     public function destroy(Request $request)
     {
-        Group::whereId(intval($request['form_delete_id']))->delete();
+        CustomerGroup::whereId(intval($request['form_customer_delete_id']))->delete();
 
-        Utils::OutputResponse(200, 'Group was successfully deleted.');
+        Utils::OutputResponse(200, 'Customer removed from the group.');
     }
 }

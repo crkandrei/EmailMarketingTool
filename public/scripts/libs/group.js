@@ -1,37 +1,100 @@
 
-let Customer = function () {
+let Group = function () {
 
-    let tableCustomer;
+    let tableGroup, tableCustomerToGroup, selectedGroup = 0;
 
     let handleDatatable = function () {
 
-        tableCustomer = $('#table_customer').DataTable({
+        tableGroup = $('#table_group').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "customer",
+            ajax: "group",
             method: "GET",
             columns: [
                 {width:"10%", title:'#', data:'DT_RowIndex', name:'DT_RowIndex'},
-                {width:"10%", title:'First Name', data:'first_name', name:'first_name'},
-                {width:"10%", title:'Last Name', data:'last_name', name:'last_name'},
-                {width:"10%", title:'Gender', data:'gender', name:'gender'},
-                {width:"20%", title:'Email', data:'email', name:'email'},
-                {width:"20%", title:'Birth Day', data:'birthday', name:'birthday'},
-                {width:"20%", title:'Actions', data:'action', name:'action', orderable: false}
+                {width:"60%", title:'Group Name', data:'name', name:'name'},
+                {width:"30%", title:'Actions', data:'action', name:'action', orderable: false}
+            ]
+        });
+
+        tableCustomerToGroup = $('#table_customer_to_group').DataTable({
+            processing: true,
+            serverSide: true,
+            searching: false,
+            ajax: {
+                url: "customer-to-group",
+                data: function (data) {
+                    data.group_id = selectedGroup;
+                },
+                type: "GET"
+            },
+            columns: [
+                {width:"10%", title:'#', data:'DT_RowIndex', name:'DT_RowIndex'},
+                {width:"30%", title:'Customer', data:'customer_name', name:'customer_name'},
+                {width:"30%", title:'Customer', data:'customer.email', name:'customer.email'},
+                {width:"30%", title:'Actiuni', data:'action', name:'action', orderable: false}
             ]
         });
 
     }
 
+    ////////////////////////////////////////////////////////////////////ADD CUSTOMER FORM //////////////////////////////////////////////////////////////////////////////////////////////////////
+    let handleAddCustomerToGroupReset = function () {
+        $('#form_add_name').val('');
+    }
+
+    let handleAddCustomerToGroupSuccess = function (responseText) {
+
+        $.unblockUI();
+        // Response processing
+        if (responseText===null || responseText.hasOwnProperty('Value')===false || responseText.hasOwnProperty('Message')===false)
+        {
+            // Message
+            toastr.error("The action couldn't be completed !");
+            return;
+        }
+
+        let responseValue = 1*responseText.Value,
+            responseMessage = responseText.Message;
+
+        if (responseValue===200) // Succes
+        {
+            // Close Modal
+            $('#modal_customer').modal('hide');
+            // Reset form
+            handleAddCustomerToGroupReset();
+            // Message
+            toastr.success(responseMessage);
+
+            // Refresh tabel
+            tableCustomerToGroup.draw(false);
+
+        }
+        else // Erorr
+        {
+            toastr.error(responseMessage);
+        }
+    }
+
+    let handleAddCustomerToGroupError = function () {
+
+        // Message
+        toastr.error("The action couldn't be completed ");
+        $.unblockUI();
+
+    }
+
+    let formAddCustomerToGroupOptions = {
+        success: handleAddCustomerToGroupSuccess,
+        error: handleAddCustomerToGroupError,
+        url:      "customer-to-group",
+        type:     'POST',
+        dataType: 'json'
+    }
+
     ////////////////////////////////////////////////////////////////////ADD FORM //////////////////////////////////////////////////////////////////////////////////////////////////////
     let handleAddReset = function () {
-
-        $('#form_add_first_name').val('');
-        $('#form_add_last_name').val('');
-        $('#form_add_email').val('');
-        $('#form_add_gender').val('');
-        $('#form_add_birthday').val('');
-
+        $('#form_add_name').val('');
     }
 
     let handleAddSuccess = function (responseText) {
@@ -58,7 +121,7 @@ let Customer = function () {
             toastr.success(responseMessage);
 
             // Refresh tabel
-            tableCustomer.draw(false);
+            tableGroup.draw(false);
 
         }
         else // Erorr
@@ -75,26 +138,20 @@ let Customer = function () {
 
     }
 
-    var formAddOptions = {
+    let formAddOptions = {
         success: handleAddSuccess,
         error: handleAddError,
-        url:      "customer",
+        url:      "group",
         type:     'POST',
         dataType: 'json'
     }
 
     ////////////////////////////////////////////////////////////////////EDIT FORM //////////////////////////////////////////////////////////////////////////////////////////////////////
     let handleEditReset = function () {
-
-        $('#form_edit_first_name').val('');
-        $('#form_edit_last_name').val('');
-        $('#form_edit_gender').val('');
-        $('#form_edit_birthday').val('');
-
+        $('#form_edit_name').val('');
     }
 
     let handleEditSuccess = function (responseText) {
-        debugger;
         $.unblockUI();
         // Response Processing
         if (responseText===null || responseText.hasOwnProperty('Value')===false || responseText.hasOwnProperty('Message')===false)
@@ -118,7 +175,7 @@ let Customer = function () {
             toastr.success(responseMessage);
 
             // Refresh tabel
-            tableCustomer.draw(false);
+            tableGroup.draw(false);
 
         }
         else // Eroare la
@@ -138,7 +195,7 @@ let Customer = function () {
     let formEditOptions = {
         success: handleEditSuccess,
         error: handleEditError,
-        url:      "customer/"+1*$('#form_edit_id').val(),
+        url:      "group/"+1*$('#form_edit_id').val(),
         type:     'PUT',
         dataType: 'json'
     }
@@ -170,7 +227,7 @@ let Customer = function () {
             toastr.success(responseMessage);
 
             // Refresh tabel
-            tableCustomer.draw(false);
+            tableGroup.draw(false);
 
         }
         else // Eroare la
@@ -190,7 +247,58 @@ let Customer = function () {
     let formDeleteOptions = {
         success: handleDeleteSuccess,
         error: handleDeleteError,
-        url:      "customer/"+1*$('#form_delete_id').val(),
+        url:      "group/"+1*$('#form_delete_id').val(),
+        type:     'DELETE',
+        dataType: 'json'
+    }
+
+    ////////////////////////////////////////////////////////////////////Delete CUSTOMER FORM //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    let handleDeleteCustomerToGroupSuccess = function (responseText) {
+
+        $.unblockUI();
+
+        // Resonse Processing
+        if (responseText===null || responseText.hasOwnProperty('Value')===false || responseText.hasOwnProperty('Message')===false)
+        {
+            // Message
+            toastr.error('The action couldn\'t be completed !');
+            return;
+        }
+
+        let responseValue = 1*responseText.Value,
+            responseMessage = responseText.Message;
+        // Actions for every response
+        if (responseValue===200) // Success
+        {
+            // Close Modal
+            $('#modal_customer_delete').modal('hide');
+            // Reset form
+            handleEditReset();
+            // Message
+            toastr.success(responseMessage);
+
+            // Refresh tabel
+            tableCustomerToGroup.draw(false);
+
+        }
+        else // Eroare la
+        {
+            toastr.error(responseMessage);
+        }
+    }
+
+    let handleDeleteCustomerToGroupError = function () {
+        // Message
+        toastr.error("The action couldn't be completed ");
+        $.unblockUI();
+    }
+
+    let formDeleteCustomerToGroupOptions = {
+        success: handleDeleteCustomerToGroupSuccess,
+        error: handleDeleteCustomerToGroupError,
+        url:      "customer-to-group/"+1*$('#form_customer_delete_id').val(),
         type:     'DELETE',
         dataType: 'json'
     }
@@ -201,30 +309,46 @@ let Customer = function () {
 
             handleEditReset();
             let nTr = $(this).closest("tr").get(0),
-                data = tableCustomer.row(nTr).data();
+                data = tableGroup.row(nTr).data();
             $('#form_edit_id').val(1*data.id);
-            $('#form_edit_first_name').val(data.first_name);
-            $('#form_edit_last_name').val(data.last_name);
-            $('#form_edit_email').val(data.email);
-            $('#form_edit_gender').val(data.gender);
-            $('#form_edit_birthday').val(data.birthday);
+            $('#form_edit_name').val(data.name);
 
             // Show modal
             $('#modal_edit').modal({show: true, modalOverflow: true});
         });
 
         $(document).on('click', '.delete', function () {
-
             let nTr = $(this).closest("tr").get(0),
-                 data = tableCustomer.row(nTr).data();
+                 data = tableGroup.row(nTr).data();
             $('#form_delete_id').val(1*data.id);
 
-            // Afisare modala
+            // Show Modal
             $('#modal_delete').modal({show: true, modalOverflow: true});
         });
 
-    }
+        $(document).on('click', '.customers-to-group', function () {
+            let nTr = $(this).closest("tr").get(0),
+                data = tableGroup.row(nTr).data();
 
+            $('#form_add_group_id').val(data.id);
+            selectedGroup = data.id;
+            tableCustomerToGroup.ajax.reload();
+
+            // Show Modal
+            $('#modal_add_customer_to_group').modal({show: true, modalOverflow: true});
+        });
+
+        $(document).on('click', '.delete-customers-to-group', function () {
+            let nTr = $(this).closest("tr").get(0),
+                data = tableCustomerToGroup.row(nTr).data();
+
+            $('#form_customer_delete_id').val(data.id);
+
+            // Show Modal
+            $('#modal_customer_delete').modal({show: true, modalOverflow: true});
+        });
+
+    }
 
     let handleAjaxRequest = function () {
 
@@ -248,8 +372,21 @@ let Customer = function () {
 
         })
 
-    }
+        $('#form_customers_add_submit').on('click', function () {
 
+            $('#form_customer_add').ajaxSubmit(formAddCustomerToGroupOptions);
+            $.blockUI({ message: 'Asteapta..' });
+
+        })
+
+        $('#form_customer_delete_submit').on('click', function () {
+
+            $('#form_customer_delete').ajaxSubmit(formDeleteCustomerToGroupOptions);
+            $.blockUI({ message: 'Asteapta..' });
+
+        })
+
+    }
 
     return {
         init: function () {

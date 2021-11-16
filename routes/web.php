@@ -14,5 +14,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
+
+Route::group(['middleware' => 'auth'], function() {
+    Route::resource('/customer', App\Http\Controllers\CustomerController::class)->except(['create','show','edit']);
+    Route::resource('/group', App\Http\Controllers\GroupController::class)->except(['create','show','edit']);
+    Route::resource('/customer-to-group', App\Http\Controllers\CustomerGroupController::class)->except(['create','show','edit']);
+});
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
