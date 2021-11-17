@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CustomerGroupAddRequest;
 use App\Http\Utils;
 use App\Models\CustomerGroup;
-use App\Models\Group;
 use Illuminate\Http\Request;
 
 class CustomerGroupController extends Controller

@@ -17,7 +17,7 @@
 
 
             <li class="c-sidebar-nav-item c-sidebar-nav-dropdown">
-                <a class="c-sidebar-nav-link"  href="#" >
+                <a class="c-sidebar-nav-link" href="{{route('template.index')}}">
                     {{ __('Templates') }}</a>
             </li>
 
@@ -25,13 +25,10 @@
 
         <li class="c-sidebar-nav-title">{{ __('Email Notification Center') }}</li>
             <li class="c-sidebar-nav-item c-sidebar-nav-dropdown">
-                <a class="c-sidebar-nav-link">{{ __('Send Message') }}
+                <a class="c-sidebar-nav-link" href="{{route('dashboard.index')}}">{{ __('Dashboard') }}
                 </a>
             </li>
-        <li class="c-sidebar-nav-item c-sidebar-nav-dropdown">
-            <a class="c-sidebar-nav-link"> {{ __('Schedule Message') }}
-            </a>
-        </li>
+
     </ul>
     <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
             data-class="c-sidebar-minimized"></button>

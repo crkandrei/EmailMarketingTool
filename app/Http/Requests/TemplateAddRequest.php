@@ -9,7 +9,8 @@ class TemplateAddRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'form_add_subject' => 'required|string|max:100',
+            'form_add_subject' => 'required|string|max:255',
+            'form_add_name' => 'required|string|max:255',
             'form_add_message' => 'required|string'
         ];
     }
