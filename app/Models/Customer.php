@@ -27,7 +27,7 @@ class Customer extends Model
     {
         $template->parseTemplate($this->first_name, $this->last_name, $this->email);
 
-        $this->sendEmail($template->subject, $template->message, $this->email);
+        $this->sendEmail($template->parsedSubject, $template->parsedMessage, $this->email);
     }
 
 }

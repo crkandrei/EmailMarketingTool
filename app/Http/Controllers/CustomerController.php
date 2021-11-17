@@ -51,7 +51,6 @@ class CustomerController extends Controller
             Utils::OutputResponse(405, $request->messages());
         }
         $customer = new Customer([
-            "first_name"    => $request['form_add_first_name'],
             "last_name"     => $request['form_add_last_name'],
             "email"         => $request['form_add_email'],
             "gender"        => $request['form_add_gender'] ?? null,

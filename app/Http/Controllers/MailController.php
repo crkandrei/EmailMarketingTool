@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\MailSenderTrait;
 use App\Http\Utils;
 use App\Models\Customer;
 use App\Models\Group;
+use App\Models\Task;
 use App\Models\Template;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MailController extends Controller
 {
+    use MailSenderTrait;
     /**
      * Send Mail to users.
      *
@@ -17,18 +21,11 @@ class MailController extends Controller
      */
     public function sendMassMail(Request $request)
     {
-        $customerIds = Group::find($request['group_id'])->customer_ids;
-        $template = Template::find($request['template_id']);
-
-        $customers = Customer::wherein('id',$customerIds)->get();
-
-        foreach ($customers as $customer){
-
-            $customer->initiateSendMail($template);
-        }
+        $this->consumeTaskMessage($request['group_id'], $request['template_id']);
 
         Utils::OutputResponse(200, 'Mass Email sent.');
     }
+
     /**
      * Send Mail to users.
      *
@@ -36,13 +33,18 @@ class MailController extends Controller
      */
     public function scheduleMail(Request $request)
     {
+        $task = New Task([
+                "group_id"       => $request['group_id'],
+                "template_id"    => $request['template_id'],
+                "user_id"        => Auth::user()->id,
+                "date"           => $request['date'],
+            ]
+        );
 
-        $date = $request['date'];
+        $task->save();
 
-        ////////// SCHEDULE //////////////////////////////////////////
+        Utils::OutputResponse(200, 'Task was scheduled sucessfully.');
 
-        //$schedule->call($this->sendMassMail($request))->date();
     }
-
 
 }
